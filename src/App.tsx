@@ -68,21 +68,21 @@ const navItems = [
 
 const copy = {
   ru: {
-    heroBadge: 'Студия разработки бизнес-систем',
-    heroTitle: 'Разрабатываем ПО, автоматизируем процессы и внедряем AI для современных компаний',
+    heroBadge: 'Software engineering company',
+    heroTitle: 'Проектируем и разрабатываем бизнес-системы для компаний по всему миру',
     heroText:
-      'WiseHeart Tech создает веб-платформы, мобильные приложения, CRM/ERP, аналитические панели и AI-автоматизацию, которые помогают бизнесу работать быстрее, прозрачнее и точнее.',
+      'WiseHeart Tech превращает разрозненные процессы в управляемые цифровые продукты: CRM/ERP, веб-платформы, мобильные приложения, рабочие workflow, аналитические панели и AI-автоматизацию.',
     primaryCta: 'Обсудить проект',
-    secondaryCta: 'Смотреть портфолио',
+    secondaryCta: 'Посмотреть кейсы',
     stats: [
-      ['7+', 'лет инженерного опыта'],
-      ['42', 'запущенных продукта'],
-      ['18', 'отраслей бизнеса'],
+      ['Global', 'работаем независимо от страны'],
+      ['CRM', 'системы, сайты и workflow'],
+      ['IP', 'зарегистрированы в Кыргызстане'],
     ],
-    aboutTitle: 'Инженерная команда для цифровой трансформации',
+    aboutTitle: 'Инженерная команда для сложных бизнес-процессов',
     aboutText:
-      'Мы проектируем бизнес-ориентированные системы: от клиентских порталов и внутренних кабинетов до AI-ассистентов, интеграций и автоматизации документооборота. Наша задача не просто написать код, а собрать надежную цифровую основу для роста компании.',
-    servicesTitle: 'Что мы разрабатываем',
+      'Мы работаем как технический партнер: разбираемся в процессах, проектируем архитектуру, собираем интерфейсы, backend, интеграции и AI-сценарии, а затем доводим продукт до запуска и развития. Компания зарегистрирована в Кыргызстане, но проекты берем без привязки к стране клиента.',
+    servicesTitle: 'Что мы берем в разработку',
     automationTitle: 'AI и автоматизация как рабочая инфраструктура',
     automationText:
       'Мы внедряем искусственный интеллект туда, где он дает измеримую пользу: ускоряет обработку заявок, помогает командам принимать решения, автоматизирует документы, связывает CRM/ERP и делает аналитику понятной руководителям.',
@@ -99,12 +99,12 @@ const copy = {
     formEmail: 'Email или телефон',
     formMessage: 'Кратко о проекте',
     formSubmit: 'Отправить запрос',
-    formHelper: 'Мы ответим с предварительными вопросами и вариантом следующего шага.',
-    formSuccess: 'Заявка подготовлена. Подключите реальную отправку формы, когда будут готовы контакты.',
+    formHelper: 'После отправки мы откроем Telegram @wisehearttech и скопируем текст заявки, чтобы вы могли сразу отправить его в чат.',
+    formSuccess: 'Текст заявки скопирован. Telegram открыт в новом окне, отправьте сообщение в чат @wisehearttech.',
     servicesEyebrow: 'Услуги',
     automationEyebrow: 'AI и автоматизация',
     portfolioEyebrow: 'Кейсы',
-    portfolioIntro: 'Карточки сделаны как аккуратные макеты-заглушки, чтобы позже заменить их на ваши реальные изображения.',
+    portfolioIntro: 'Ниже показаны направления реальных работ: CRM, сайты, операционные системы и workflow. Названия клиентов можно раскрывать или оставлять под NDA.',
     processEyebrow: 'Процесс',
     stackEyebrow: 'Стек',
     benefitsEyebrow: 'Преимущества',
@@ -125,24 +125,24 @@ const copy = {
     automationMetrics: ['Синхронизация CRM', 'Документы AI', 'Умная маршрутизация', 'Аналитика'],
     resultLabel: 'Результат',
     footerText: 'Разработка ПО, автоматизация и AI-интеграции.',
-    contactPlaceholders: ['WiseHeart Tech', 'hello@company.com', 'CRM, AI-ассистент, дашборд, мобильное приложение...'],
+    contactPlaceholders: ['Ваше имя или компания', 'Email, телефон или Telegram', 'CRM, сайт, workflow, AI-автоматизация, мобильное приложение...'],
   },
   en: {
-    heroBadge: 'Software studio for business systems',
-    heroTitle: 'We build software, automate business processes, and integrate AI solutions for modern companies',
+    heroBadge: 'Software engineering company',
+    heroTitle: 'We design and build business systems for companies worldwide',
     heroText:
-      'WiseHeart Tech creates web platforms, mobile apps, CRM/ERP systems, dashboards, and AI automation that help companies operate faster, clearer, and with better control.',
+      'WiseHeart Tech turns scattered operations into controlled digital products: CRM/ERP, web platforms, mobile apps, working workflows, analytics dashboards, and AI automation.',
     primaryCta: 'Discuss Project',
     secondaryCta: 'View Portfolio',
     stats: [
-      ['7+', 'years of engineering experience'],
-      ['42', 'products launched'],
-      ['18', 'business domains'],
+      ['Global', 'work without country limits'],
+      ['CRM', 'systems, websites, workflows'],
+      ['IP', 'registered in Kyrgyzstan'],
     ],
-    aboutTitle: 'An engineering team for digital transformation',
+    aboutTitle: 'An engineering team for complex business processes',
     aboutText:
-      'We design business-oriented systems: from client portals and internal workspaces to AI assistants, integrations, and document automation. Our work is not just code, but a reliable digital foundation for growth.',
-    servicesTitle: 'What we build',
+      'We work as a technical partner: understand processes, design architecture, build interfaces, backend, integrations, and AI scenarios, then bring the product to launch and long-term development. The company is registered in Kyrgyzstan and works with clients worldwide.',
+    servicesTitle: 'What we can build',
     automationTitle: 'AI and automation as working infrastructure',
     automationText:
       'We integrate AI where it creates measurable value: faster request handling, better decisions, automated documents, connected CRM/ERP workflows, and analytics leaders can actually use.',
@@ -158,12 +158,12 @@ const copy = {
     formEmail: 'Email or phone',
     formMessage: 'Project brief',
     formSubmit: 'Send Request',
-    formHelper: 'We will reply with initial questions and a suggested next step.',
-    formSuccess: 'Request is ready. Connect real form delivery when contact channels are finalized.',
+    formHelper: 'After submit, we will open Telegram @wisehearttech and copy your request text so you can send it directly.',
+    formSuccess: 'Request text copied. Telegram opened in a new window, send the message to @wisehearttech.',
     servicesEyebrow: 'Services',
     automationEyebrow: 'AI & Automation',
     portfolioEyebrow: 'Case studies',
-    portfolioIntro: 'Cards are designed as clean mockup placeholders so you can replace them with your real project images later.',
+    portfolioIntro: 'These directions reflect real work: CRM, websites, operating systems, and workflows. Client names can be disclosed or kept under NDA.',
     processEyebrow: 'Workflow',
     stackEyebrow: 'Stack',
     benefitsEyebrow: 'Benefits',
@@ -184,7 +184,7 @@ const copy = {
     automationMetrics: ['CRM sync', 'Document AI', 'Smart routing', 'Analytics'],
     resultLabel: 'Result',
     footerText: 'Software development, automation and AI integration.',
-    contactPlaceholders: ['WiseHeart Tech', 'hello@company.com', 'CRM, AI assistant, dashboard, mobile app...'],
+    contactPlaceholders: ['Your name or company', 'Email, phone, or Telegram', 'CRM, website, workflow, AI automation, mobile app...'],
   },
 };
 
@@ -406,28 +406,28 @@ const automationFeatures = [
 
 const projects = [
   {
-    ru: ['Корпоративный сайт', 'Веб-платформа', 'Премиальный сайт компании с сильной презентацией услуг и заявками.'],
-    en: ['Corporate Website', 'Web platform', 'A premium company website with strong service presentation and lead capture.'],
+    ru: ['Корпоративный сайт для IT-компании', 'Веб-платформа', 'Структура услуг, сильная презентация команды, заявки через форму и подготовка к SEO-продвижению.'],
+    en: ['Corporate website for an IT company', 'Web platform', 'Service structure, strong team presentation, lead form flow, and preparation for SEO growth.'],
   },
   {
-    ru: ['Система ресторана', 'Операционная система', 'Учет заказов, смен, склада, меню, аналитики и ролей персонала.'],
-    en: ['Restaurant Management System', 'Operations system', 'Orders, shifts, inventory, menu, analytics, and staff roles in one place.'],
+    ru: ['Операционная система ресторана', 'Workflow и учет', 'Заказы, смены, склад, меню, роли сотрудников и отчеты собраны в одном рабочем интерфейсе.'],
+    en: ['Restaurant operating system', 'Workflow and accounting', 'Orders, shifts, inventory, menu, staff roles, and reports inside one working interface.'],
   },
   {
-    ru: ['CRM-платформа', 'Бизнес-система', 'Единая система продаж, клиентов, задач, уведомлений и отчетности.'],
-    en: ['CRM Platform', 'Business system', 'A unified system for sales, customers, tasks, notifications, and reporting.'],
+    ru: ['CRM для отдела продаж', 'Бизнес-система', 'Единая база клиентов, сделки, задачи, уведомления, статусы и управленческая отчетность.'],
+    en: ['Sales department CRM', 'Business system', 'Single client base, deals, tasks, notifications, statuses, and management reporting.'],
   },
   {
-    ru: ['Платформа интернет-магазина', 'Коммерция', 'Каталог, корзина, оплата, складские интеграции и личный кабинет.'],
-    en: ['E-commerce Platform', 'Commerce', 'Catalog, cart, payments, warehouse integrations, and customer accounts.'],
+    ru: ['E-commerce платформа', 'Коммерция', 'Каталог, корзина, оплата, личный кабинет и интеграции со складскими процессами.'],
+    en: ['E-commerce platform', 'Commerce', 'Catalog, cart, payments, customer account, and warehouse process integrations.'],
   },
   {
-    ru: ['AI-бот поддержки', 'AI-автоматизация', 'Ответы по базе знаний, маршрутизация запросов и сводки для операторов.'],
-    en: ['AI Support Bot', 'AI automation', 'Knowledge-base answers, request routing, and summaries for operators.'],
+    ru: ['AI-ассистент поддержки', 'AI-автоматизация', 'Ответы по базе знаний, маршрутизация запросов, краткие сводки и передача оператору.'],
+    en: ['AI support assistant', 'AI automation', 'Knowledge-base answers, request routing, short summaries, and handoff to an operator.'],
   },
   {
-    ru: ['Бизнес-дашборд', 'Аналитика', 'Панели KPI, финансовые метрики, статусы проектов и прогнозы.'],
-    en: ['Business Analytics Dashboard', 'Analytics', 'KPI panels, financial metrics, project statuses, and forecasting.'],
+    ru: ['Бизнес-дашборд руководителя', 'Аналитика', 'KPI, финансы, статусы проектов, динамика продаж и понятные срезы для принятия решений.'],
+    en: ['Executive business dashboard', 'Analytics', 'KPI, finance, project statuses, sales dynamics, and clear views for decisions.'],
   },
 ];
 
@@ -1168,17 +1168,21 @@ function TrustSection({ language }: { language: Language }) {
           <div className="grid gap-4 sm:grid-cols-2">
             {(language === 'ru'
               ? [
-                  ['“Команда быстро разобралась в процессах и предложила понятную архитектуру вместо набора случайных функций.”', 'Операционный директор'],
-                  ['“После автоматизации менеджеры видят задачи, статусы и данные без ручных таблиц.”', 'Коммерческая команда'],
+                  ['Discovery перед разработкой', 'Сначала разбираем процессы, роли, данные, интеграции и ограничения. После этого предлагаем архитектуру и этапы.'],
+                  ['Проекты под NDA', 'Кейсы можно показывать анонимно: без раскрытия клиента, но с понятной задачей, решением и результатом.'],
+                  ['Работа без границ', 'Компания зарегистрирована в Кыргызстане, а разработку и коммуникацию выстраиваем независимо от страны клиента.'],
+                  ['Передача и поддержка', 'После запуска остаются код, документация, доступы, инструкции и понятный план дальнейшего развития.'],
                 ]
               : [
-                  ['“The team quickly understood our processes and proposed clear architecture instead of random features.”', 'Operations director'],
-                  ['“After automation, managers see tasks, statuses, and data without manual spreadsheets.”', 'Commercial team'],
+                  ['Discovery before development', 'We first understand processes, roles, data, integrations, and constraints. Then we propose architecture and stages.'],
+                  ['NDA-ready projects', 'Cases can be shown anonymously: no client disclosure, but with clear task, solution, and result.'],
+                  ['Borderless work', 'The company is registered in Kyrgyzstan, while development and communication work independently of client country.'],
+                  ['Handover and support', 'After launch, the client gets code, documentation, access, instructions, and a clear development plan.'],
                 ]
-            ).map(([quote, role]) => (
-              <FadeIn key={role} className="rounded-[28px] border border-white bg-white/75 p-6 shadow-sm backdrop-blur">
-                <p className="text-lg leading-8 text-slate-700">{quote}</p>
-                <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-sky-500">{role}</p>
+            ).map(([title, text]) => (
+              <FadeIn key={title} className="rounded-[28px] border border-white bg-white/75 p-6 shadow-sm backdrop-blur">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-sky-500">{title}</p>
+                <p className="mt-5 text-lg leading-8 text-slate-700">{text}</p>
               </FadeIn>
             ))}
           </div>
@@ -1224,6 +1228,18 @@ function ContactSection({ language }: { language: Language }) {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const name = String(data.get('name') ?? '').trim();
+    const contact = String(data.get('contact') ?? '').trim();
+    const message = String(data.get('message') ?? '').trim();
+    const requestText =
+      language === 'ru'
+        ? `Заявка с сайта WiseHeart Tech\n\nИмя/компания: ${name}\nКонтакт: ${contact}\nПроект: ${message}`
+        : `Request from WiseHeart Tech website\n\nName/company: ${name}\nContact: ${contact}\nProject: ${message}`;
+
+    void navigator.clipboard?.writeText(requestText).catch(() => undefined);
+    window.open('https://t.me/wisehearttech', '_blank', 'noopener,noreferrer');
     setSubmitted(true);
   };
 
@@ -1236,14 +1252,14 @@ function ContactSection({ language }: { language: Language }) {
           <p className="mt-6 text-lg leading-8 text-slate-300">{c.contactText}</p>
           <div className="mt-8 grid gap-3">
             {([
-              [MessageSquareText, 'hello@wiseheart.tech'],
-              [Phone, 'WhatsApp: +7 000 000 00 00'],
-              [Sparkles, 'Telegram: @wisehearttech'],
-            ] satisfies [LucideIcon, string][]).map(([Icon, text]) => (
-              <div key={String(text)} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-200">
+              [Phone, 'WhatsApp: +996 554 520 356', 'https://wa.me/996554520356'],
+              [Sparkles, 'Telegram: @wisehearttech', 'https://t.me/wisehearttech'],
+              [MessageSquareText, language === 'ru' ? 'Работаем с клиентами по всему миру' : 'Working with clients worldwide', '#contact'],
+            ] satisfies [LucideIcon, string, string][]).map(([Icon, text, href]) => (
+              <a key={String(text)} href={href} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-sky-300/30 hover:bg-white/10">
                 <Icon size={18} className="text-[#7DD3FC]" />
                 {text}
-              </div>
+              </a>
             ))}
           </div>
         </FadeIn>
@@ -1252,13 +1268,14 @@ function ContactSection({ language }: { language: Language }) {
           <form onSubmit={handleSubmit} className="grid gap-4">
             {[
               ['name', c.formName, c.contactPlaceholders[0]],
-              ['email', c.formEmail, c.contactPlaceholders[1]],
+              ['contact', c.formEmail, c.contactPlaceholders[1]],
             ].map(([id, label, placeholder]) => (
               <label key={id} className="grid gap-2">
                 <span className="text-sm font-black">{label}</span>
                 <input
                   required
                   id={id}
+                  name={id}
                   placeholder={placeholder}
                   className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-sky-300 focus:bg-white"
                 />
@@ -1268,6 +1285,7 @@ function ContactSection({ language }: { language: Language }) {
               <span className="text-sm font-black">{c.formMessage}</span>
               <textarea
                 required
+                name="message"
                 rows={5}
                 placeholder={c.contactPlaceholders[2]}
                 className="resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-sky-300 focus:bg-white"
