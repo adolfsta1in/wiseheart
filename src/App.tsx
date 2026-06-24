@@ -32,7 +32,6 @@ import {
   Sparkles,
   Workflow,
   X,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import {
@@ -579,8 +578,8 @@ function Navbar({ language, setLanguage }: { language: Language; setLanguage: (v
     <header className="fixed inset-x-0 top-0 z-40 px-4 pt-4 sm:px-6">
       <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/70 bg-white/75 px-4 py-3 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:px-5">
         <a href="#home" className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-[#0F172A] text-white shadow-inner">
-            <Sparkles size={18} strokeWidth={2} />
+          <span className="grid h-10 w-10 overflow-hidden rounded-full bg-[#0F172A] shadow-inner">
+            <img src="/wiseheart-logo.png" alt="WiseHeart Tech logo" className="h-full w-full object-cover" />
           </span>
           <span className="text-sm font-black tracking-tight text-[#0F172A] sm:text-base">WiseHeart Tech</span>
         </a>
@@ -635,12 +634,12 @@ function HeroVisual({ language }: { language: Language }) {
   const tabs = c.heroTabs;
 
   return (
-    <div className="relative min-h-[520px]">
+    <div className="relative min-h-[520px] lg:-mt-16">
       <motion.div
         aria-hidden="true"
         animate={{ y: [0, -14, 0], rotate: [0, 1.5, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute right-4 top-2 h-28 w-28 rounded-[2rem] bg-gradient-to-br from-[#BAE9FD] to-white shadow-[0_30px_80px_-35px_rgba(14,165,233,0.75)]"
+        className="absolute right-4 -top-8 h-28 w-28 rounded-[2rem] bg-gradient-to-br from-[#BAE9FD] to-white shadow-[0_30px_80px_-35px_rgba(14,165,233,0.75)]"
       />
       <motion.div
         aria-hidden="true"
@@ -649,7 +648,7 @@ function HeroVisual({ language }: { language: Language }) {
         className="absolute bottom-8 left-2 h-24 w-24 rounded-full border border-sky-100 bg-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.5)]"
       />
 
-      <FadeIn y={44} className="absolute inset-x-0 top-20 mx-auto max-w-[620px] rounded-[34px] border border-white/80 bg-white/70 p-3 shadow-[0_40px_100px_-45px_rgba(15,23,42,0.45)] backdrop-blur-2xl sm:p-4">
+      <FadeIn y={44} className="absolute inset-x-0 top-6 mx-auto max-w-[620px] rounded-[34px] border border-white/80 bg-white/70 p-3 shadow-[0_40px_100px_-45px_rgba(15,23,42,0.45)] backdrop-blur-2xl sm:p-4">
         <div className="rounded-[26px] border border-slate-100 bg-[#F8FBFF] p-4">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex gap-2">
@@ -738,11 +737,7 @@ function HeroSection({ language }: { language: Language }) {
     <section id="home" className="relative overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_58%,#EAF7FF_100%)] px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(186,233,253,0.75),transparent_26%),radial-gradient(circle_at_82%_12%,rgba(125,211,252,0.28),transparent_28%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-        <FadeIn className="max-w-3xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-600 shadow-[0_18px_45px_-32px_rgba(14,165,233,0.65)] backdrop-blur">
-            <Zap size={14} strokeWidth={2} />
-            {c.heroBadge}
-          </div>
+        <FadeIn className="max-w-3xl pt-14">
           <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-tight text-[#0F172A] sm:text-6xl lg:text-7xl">
             {c.heroTitle}
           </h1>
