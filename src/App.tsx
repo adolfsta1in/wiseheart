@@ -39,6 +39,7 @@ import {
   type FormEvent,
   type HTMLAttributes,
   type PropsWithChildren,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -560,6 +561,136 @@ function MagneticButton({
   );
 }
 
+function DotGridBackground({ className = '' }: { className?: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return undefined;
+
+    const dots: {
+      x: number;
+      y: number;
+      phase: number;
+      tilt: number;
+      axis: number;
+      speed: number;
+    }[] = [];
+    const pointer = { x: -9999, y: -9999, active: false };
+    const spacing = 30;
+    const baseDot = 2.1;
+    const impactRadius = 150;
+    const color = { r: 56, g: 189, b: 248 };
+    let width = 0;
+    let height = 0;
+    let dpr = window.devicePixelRatio || 1;
+    let animationFrame = 0;
+    let previousTime = 0;
+    let angle = 0;
+
+    const smoothstep = (value: number) => {
+      const clamped = Math.max(0, Math.min(1, value));
+      return clamped * clamped * (3 - 2 * clamped);
+    };
+
+    const buildDots = () => {
+      dots.length = 0;
+      const cols = Math.ceil(width / spacing) + 4;
+      const rows = Math.ceil(height / spacing) + 4;
+
+      for (let row = -1; row < rows; row += 1) {
+        for (let col = -1; col < cols; col += 1) {
+          dots.push({
+            x: col * spacing,
+            y: row * spacing,
+            phase: Math.random() * Math.PI * 2,
+            tilt: Math.random() * Math.PI,
+            axis: Math.random() * Math.PI * 2,
+            speed: 0.65 + Math.random() * 0.7,
+          });
+        }
+      }
+    };
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildDots();
+    };
+
+    const updatePointer = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+      pointer.active = pointer.x >= 0 && pointer.x <= rect.width && pointer.y >= 0 && pointer.y <= rect.height;
+    };
+
+    const clearPointer = () => {
+      pointer.x = -9999;
+      pointer.y = -9999;
+      pointer.active = false;
+    };
+
+    const draw = (time: number) => {
+      animationFrame = requestAnimationFrame(draw);
+      const delta = Math.min((time - (previousTime || time)) / 1000, 0.05);
+      previousTime = time;
+      angle += delta * 1.25;
+
+      ctx.clearRect(0, 0, width, height);
+
+      for (const dot of dots) {
+        const dx = dot.x - pointer.x;
+        const dy = dot.y - pointer.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const influence = pointer.active && distance < impactRadius ? smoothstep(1 - distance / impactRadius) : 0;
+        const orbitRadius = spacing * 0.78 * influence;
+        const theta = angle * dot.speed + dot.phase;
+        const cosAxis = Math.cos(dot.axis);
+        const sinAxis = Math.sin(dot.axis);
+        const cosTilt = Math.cos(dot.tilt);
+        const depth = Math.sin(theta) * Math.sin(dot.tilt);
+        const localX = Math.cos(theta);
+        const localY = Math.sin(theta) * cosTilt;
+        const x = dot.x + (localX * cosAxis - localY * sinAxis) * orbitRadius;
+        const y = dot.y + (localX * sinAxis + localY * cosAxis) * orbitRadius;
+        const depthScale = 0.82 + 0.18 * ((depth + 1) * 0.5);
+        const radius = baseDot * (1 + influence * 1.65) * depthScale;
+        const alpha = (0.22 + influence * 0.64) * depthScale;
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+        ctx.fill();
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(canvas);
+    window.addEventListener('pointermove', updatePointer, { passive: true });
+    window.addEventListener('pointerleave', clearPointer);
+    resize();
+    animationFrame = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener('pointermove', updatePointer);
+      window.removeEventListener('pointerleave', clearPointer);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} aria-hidden="true" className={`pointer-events-none block ${className}`} />;
+}
+
 function SectionHeader({ eyebrow, title, text }: { eyebrow: string; title: string; text?: string }) {
   return (
     <FadeIn className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
@@ -735,7 +866,8 @@ function HeroSection({ language }: { language: Language }) {
 
   return (
     <section id="home" className="relative overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_58%,#EAF7FF_100%)] px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(186,233,253,0.75),transparent_26%),radial-gradient(circle_at_82%_12%,rgba(125,211,252,0.28),transparent_28%)]" />
+      <DotGridBackground className="absolute inset-0 h-full w-full opacity-80 [mask-image:linear-gradient(180deg,black_0%,black_72%,transparent_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(186,233,253,0.68),transparent_27%),radial-gradient(circle_at_82%_14%,rgba(125,211,252,0.2),transparent_30%),linear-gradient(90deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.26)_44%,rgba(255,255,255,0.54)_100%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <FadeIn className="max-w-3xl pt-14">
           <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-tight text-[#0F172A] sm:text-6xl lg:text-7xl">
