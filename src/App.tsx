@@ -561,7 +561,7 @@ function MagneticButton({
   );
 }
 
-function DotGridBackground({ className = '' }: { className?: string }) {
+function AntigravityBackground({ className = '' }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -571,50 +571,20 @@ function DotGridBackground({ className = '' }: { className?: string }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return undefined;
 
-    const dots: {
-      x: number;
-      y: number;
-      phase: number;
-      tilt: number;
-      axis: number;
-      speed: number;
-    }[] = [];
-    const pointer = { x: -9999, y: -9999, active: false };
-    const field = { x: -9999, y: -9999, vx: 0, vy: 0, active: false, strength: 0 };
-    const spacing = 28;
-    const baseDot = 2.6;
-    const impactRadius = 190;
-    const color = { r: 56, g: 189, b: 248 };
+    const pointer = { x: 0, y: 0, active: false };
+    const field = { x: 0, y: 0, vx: 0, vy: 0, strength: 0 };
+    const orbs = [
+      { x: 0.18, y: 0.1, radius: 0.48, color: [186, 233, 253], alpha: 0.46, speed: 0.12, phase: 0.2 },
+      { x: 0.86, y: 0.16, radius: 0.42, color: [125, 211, 252], alpha: 0.34, speed: 0.16, phase: 1.8 },
+      { x: 0.52, y: 0.54, radius: 0.54, color: [226, 246, 255], alpha: 0.42, speed: 0.1, phase: 3.2 },
+      { x: 0.14, y: 0.88, radius: 0.38, color: [148, 208, 236], alpha: 0.22, speed: 0.18, phase: 4.4 },
+    ];
     let width = 0;
     let height = 0;
     let dpr = window.devicePixelRatio || 1;
     let animationFrame = 0;
     let previousTime = 0;
-    let angle = 0;
-
-    const smoothstep = (value: number) => {
-      const clamped = Math.max(0, Math.min(1, value));
-      return clamped * clamped * (3 - 2 * clamped);
-    };
-
-    const buildDots = () => {
-      dots.length = 0;
-      const cols = Math.ceil(width / spacing) + 4;
-      const rows = Math.ceil(height / spacing) + 4;
-
-      for (let row = -1; row < rows; row += 1) {
-        for (let col = -1; col < cols; col += 1) {
-          dots.push({
-            x: col * spacing,
-            y: row * spacing,
-            phase: Math.random() * Math.PI * 2,
-            tilt: Math.random() * Math.PI,
-            axis: Math.random() * Math.PI * 2,
-            speed: 0.65 + Math.random() * 0.7,
-          });
-        }
-      }
-    };
+    let timeScale = 0;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -624,7 +594,13 @@ function DotGridBackground({ className = '' }: { className?: string }) {
       canvas.width = Math.max(1, Math.floor(width * dpr));
       canvas.height = Math.max(1, Math.floor(height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      buildDots();
+
+      if (!pointer.active) {
+        pointer.x = width * 0.68;
+        pointer.y = height * 0.22;
+        field.x = pointer.x;
+        field.y = pointer.y;
+      }
     };
 
     const updatePointer = (event: PointerEvent) => {
@@ -632,66 +608,80 @@ function DotGridBackground({ className = '' }: { className?: string }) {
       pointer.x = event.clientX - rect.left;
       pointer.y = event.clientY - rect.top;
       pointer.active = pointer.x >= 0 && pointer.x <= rect.width && pointer.y >= 0 && pointer.y <= rect.height;
-
-      if (!field.active && pointer.active) {
-        field.x = pointer.x;
-        field.y = pointer.y;
-        field.active = true;
-      }
     };
 
     const clearPointer = () => {
-      pointer.x = -9999;
-      pointer.y = -9999;
       pointer.active = false;
+    };
+
+    const drawOrb = (x: number, y: number, radius: number, color: number[], alpha: number) => {
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
+      gradient.addColorStop(0.42, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.42})`);
+      gradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
     };
 
     const draw = (time: number) => {
       animationFrame = requestAnimationFrame(draw);
       const delta = Math.min((time - (previousTime || time)) / 1000, 0.05);
       previousTime = time;
-      angle += delta * 1.05;
+      timeScale += delta;
 
       if (pointer.active) {
-        const stiffness = 86;
+        const stiffness = 44;
         field.vx += (pointer.x - field.x) * stiffness * delta;
         field.vy += (pointer.y - field.y) * stiffness * delta;
-        field.strength += (1 - field.strength) * Math.min(1, delta * 8);
+        field.strength += (1 - field.strength) * Math.min(1, delta * 3.4);
       } else {
-        field.strength += (0 - field.strength) * Math.min(1, delta * 2.8);
+        const idleX = width * (0.54 + Math.sin(timeScale * 0.18) * 0.18);
+        const idleY = height * (0.44 + Math.cos(timeScale * 0.14) * 0.18);
+        field.vx += (idleX - field.x) * 10 * delta;
+        field.vy += (idleY - field.y) * 10 * delta;
+        field.strength += (0.42 - field.strength) * Math.min(1, delta * 1.2);
       }
 
-      field.vx *= Math.max(0, 1 - delta * 3.6);
-      field.vy *= Math.max(0, 1 - delta * 3.6);
+      field.vx *= Math.max(0, 1 - delta * 2.1);
+      field.vy *= Math.max(0, 1 - delta * 2.1);
       field.x += field.vx * delta;
       field.y += field.vy * delta;
 
       ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#f8fbff';
+      ctx.fillRect(0, 0, width, height);
 
-      for (const dot of dots) {
-        const dx = dot.x - field.x;
-        const dy = dot.y - field.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const influence = field.strength > 0.01 && distance < impactRadius ? smoothstep(1 - distance / impactRadius) * field.strength : 0;
-        const orbitRadius = spacing * 0.95 * influence;
-        const theta = angle * dot.speed + dot.phase;
-        const cosAxis = Math.cos(dot.axis);
-        const sinAxis = Math.sin(dot.axis);
-        const cosTilt = Math.cos(dot.tilt);
-        const depth = Math.sin(theta) * Math.sin(dot.tilt);
-        const localX = Math.cos(theta);
-        const localY = Math.sin(theta) * cosTilt;
-        const x = dot.x + (localX * cosAxis - localY * sinAxis) * orbitRadius;
-        const y = dot.y + (localX * sinAxis + localY * cosAxis) * orbitRadius;
-        const depthScale = 0.82 + 0.18 * ((depth + 1) * 0.5);
-        const radius = baseDot * (1 + influence * 1.95) * depthScale;
-        const alpha = (0.34 + influence * 0.58) * depthScale;
-
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
-        ctx.fill();
+      const base = Math.max(width, height);
+      for (const orb of orbs) {
+        const driftX = Math.sin(timeScale * orb.speed + orb.phase) * width * 0.065;
+        const driftY = Math.cos(timeScale * (orb.speed * 0.8) + orb.phase) * height * 0.08;
+        const pullX = (field.x - width * orb.x) * 0.11 * field.strength;
+        const pullY = (field.y - height * orb.y) * 0.11 * field.strength;
+        drawOrb(width * orb.x + driftX + pullX, height * orb.y + driftY + pullY, base * orb.radius, orb.color, orb.alpha);
       }
+
+      drawOrb(field.x, field.y, base * (0.2 + field.strength * 0.12), [125, 211, 252], 0.22 + field.strength * 0.16);
+
+      ctx.save();
+      ctx.globalAlpha = 0.24;
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.12)';
+      ctx.lineWidth = 1;
+      for (let index = 0; index < 4; index += 1) {
+        const radius = base * (0.16 + index * 0.09 + Math.sin(timeScale * 0.28 + index) * 0.012);
+        ctx.beginPath();
+        ctx.ellipse(field.x, field.y, radius * 1.7, radius * 0.58, -0.42 + index * 0.18 + timeScale * 0.018, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      const veil = ctx.createLinearGradient(0, 0, width, height);
+      veil.addColorStop(0, 'rgba(255,255,255,0.54)');
+      veil.addColorStop(0.48, 'rgba(255,255,255,0.14)');
+      veil.addColorStop(1, 'rgba(255,255,255,0.48)');
+      ctx.fillStyle = veil;
+      ctx.fillRect(0, 0, width, height);
     };
 
     const resizeObserver = new ResizeObserver(resize);
@@ -887,7 +877,7 @@ function HeroSection({ language }: { language: Language }) {
 
   return (
     <section id="home" className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(186,233,253,0.68),transparent_27%),radial-gradient(circle_at_82%_14%,rgba(125,211,252,0.2),transparent_30%),linear-gradient(90deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.26)_44%,rgba(255,255,255,0.54)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.22)_44%,rgba(255,255,255,0.48)_100%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <FadeIn className="max-w-3xl pt-14">
           <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-tight text-[#0F172A] sm:text-6xl lg:text-7xl">
@@ -1477,9 +1467,9 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('ru');
 
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_48%,#EAF7FF_100%)] font-sans text-[#0F172A]">
-      <DotGridBackground className="fixed inset-0 z-0 h-screen w-screen opacity-95" />
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_20%_12%,rgba(186,233,253,0.38),transparent_28%),radial-gradient(circle_at_86%_18%,rgba(125,211,252,0.18),transparent_30%),linear-gradient(90deg,rgba(255,255,255,0.46)_0%,rgba(255,255,255,0.16)_46%,rgba(255,255,255,0.34)_100%)]" />
+    <main className="relative min-h-screen overflow-x-clip bg-[#F8FBFF] font-sans text-[#0F172A]">
+      <AntigravityBackground className="fixed inset-0 z-0 h-screen w-screen" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.34)_46%,rgba(248,251,255,0.62)_100%)]" />
       <div className="relative z-10">
         <Navbar language={language} setLanguage={setLanguage} />
         <HeroSection language={language} />
