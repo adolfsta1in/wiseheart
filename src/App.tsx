@@ -580,9 +580,10 @@ function DotGridBackground({ className = '' }: { className?: string }) {
       speed: number;
     }[] = [];
     const pointer = { x: -9999, y: -9999, active: false };
-    const spacing = 30;
-    const baseDot = 2.1;
-    const impactRadius = 150;
+    const field = { x: -9999, y: -9999, vx: 0, vy: 0, active: false, strength: 0 };
+    const spacing = 28;
+    const baseDot = 2.6;
+    const impactRadius = 190;
     const color = { r: 56, g: 189, b: 248 };
     let width = 0;
     let height = 0;
@@ -631,6 +632,12 @@ function DotGridBackground({ className = '' }: { className?: string }) {
       pointer.x = event.clientX - rect.left;
       pointer.y = event.clientY - rect.top;
       pointer.active = pointer.x >= 0 && pointer.x <= rect.width && pointer.y >= 0 && pointer.y <= rect.height;
+
+      if (!field.active && pointer.active) {
+        field.x = pointer.x;
+        field.y = pointer.y;
+        field.active = true;
+      }
     };
 
     const clearPointer = () => {
@@ -643,16 +650,30 @@ function DotGridBackground({ className = '' }: { className?: string }) {
       animationFrame = requestAnimationFrame(draw);
       const delta = Math.min((time - (previousTime || time)) / 1000, 0.05);
       previousTime = time;
-      angle += delta * 1.25;
+      angle += delta * 1.05;
+
+      if (pointer.active) {
+        const stiffness = 86;
+        field.vx += (pointer.x - field.x) * stiffness * delta;
+        field.vy += (pointer.y - field.y) * stiffness * delta;
+        field.strength += (1 - field.strength) * Math.min(1, delta * 8);
+      } else {
+        field.strength += (0 - field.strength) * Math.min(1, delta * 2.8);
+      }
+
+      field.vx *= Math.max(0, 1 - delta * 3.6);
+      field.vy *= Math.max(0, 1 - delta * 3.6);
+      field.x += field.vx * delta;
+      field.y += field.vy * delta;
 
       ctx.clearRect(0, 0, width, height);
 
       for (const dot of dots) {
-        const dx = dot.x - pointer.x;
-        const dy = dot.y - pointer.y;
+        const dx = dot.x - field.x;
+        const dy = dot.y - field.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const influence = pointer.active && distance < impactRadius ? smoothstep(1 - distance / impactRadius) : 0;
-        const orbitRadius = spacing * 0.78 * influence;
+        const influence = field.strength > 0.01 && distance < impactRadius ? smoothstep(1 - distance / impactRadius) * field.strength : 0;
+        const orbitRadius = spacing * 0.95 * influence;
         const theta = angle * dot.speed + dot.phase;
         const cosAxis = Math.cos(dot.axis);
         const sinAxis = Math.sin(dot.axis);
@@ -663,8 +684,8 @@ function DotGridBackground({ className = '' }: { className?: string }) {
         const x = dot.x + (localX * cosAxis - localY * sinAxis) * orbitRadius;
         const y = dot.y + (localX * sinAxis + localY * cosAxis) * orbitRadius;
         const depthScale = 0.82 + 0.18 * ((depth + 1) * 0.5);
-        const radius = baseDot * (1 + influence * 1.65) * depthScale;
-        const alpha = (0.22 + influence * 0.64) * depthScale;
+        const radius = baseDot * (1 + influence * 1.95) * depthScale;
+        const alpha = (0.34 + influence * 0.58) * depthScale;
 
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -865,8 +886,7 @@ function HeroSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="home" className="relative overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_58%,#EAF7FF_100%)] px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
-      <DotGridBackground className="absolute inset-0 h-full w-full opacity-80 [mask-image:linear-gradient(180deg,black_0%,black_72%,transparent_100%)]" />
+    <section id="home" className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(186,233,253,0.68),transparent_27%),radial-gradient(circle_at_82%_14%,rgba(125,211,252,0.2),transparent_30%),linear-gradient(90deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.26)_44%,rgba(255,255,255,0.54)_100%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <FadeIn className="max-w-3xl pt-14">
@@ -900,7 +920,7 @@ function AboutSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="about" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
+    <section id="about" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <FadeIn>
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-sky-500">WiseHeart Tech</p>
@@ -960,7 +980,7 @@ function ServicesSection({ language }: { language: Language }) {
   };
 
   return (
-    <section id="services" className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
+    <section id="services" className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.servicesEyebrow} title={c.servicesTitle} />
         <div ref={servicesGridRef} className="grid scroll-mt-28 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1077,7 +1097,7 @@ function AutomationSection({ language }: { language: Language }) {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="overflow-hidden bg-white px-4 py-20 sm:px-6 lg:py-28">
+    <section className="relative overflow-hidden bg-white/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-8 rounded-[40px] border border-sky-100 bg-[linear-gradient(135deg,#0F172A_0%,#1E293B_54%,#0B4A6D_100%)] p-5 text-white shadow-[0_40px_110px_-60px_rgba(15,23,42,0.8)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
         <FadeIn className="self-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[#7DD3FC]">{c.automationEyebrow}</p>
@@ -1210,7 +1230,7 @@ function PortfolioSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="portfolio" className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
+    <section id="portfolio" className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.portfolioEyebrow} title={c.portfolioTitle} text={c.portfolioIntro} />
         {projects.map((project, index) => (
@@ -1225,7 +1245,7 @@ function ProcessSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="process" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
+    <section id="process" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.processEyebrow} title={c.processTitle} />
         <div className="grid gap-3 lg:grid-cols-7">
@@ -1248,7 +1268,7 @@ function TechAndBenefits({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
+    <section className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
           <SectionHeader eyebrow={c.stackEyebrow} title={c.techTitle} />
@@ -1285,7 +1305,7 @@ function TrustSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section className="bg-white px-4 py-20 sm:px-6">
+    <section className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6">
       <div className="mx-auto max-w-7xl rounded-[40px] border border-slate-100 bg-gradient-to-br from-white to-sky-50 p-6 shadow-[0_35px_90px_-65px_rgba(15,23,42,0.55)] sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeIn>
@@ -1324,7 +1344,7 @@ function FaqSection({ language }: { language: Language }) {
   const [open, setOpen] = useState(0);
 
   return (
-    <section className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
+    <section className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto max-w-4xl">
         <SectionHeader eyebrow={c.faqEyebrow} title={c.faqTitle} />
         <div className="grid gap-3">
@@ -1371,7 +1391,7 @@ function ContactSection({ language }: { language: Language }) {
   };
 
   return (
-    <section id="contact" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
+    <section id="contact" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-8 rounded-[40px] border border-slate-100 bg-[#0F172A] p-5 text-white shadow-[0_40px_120px_-70px_rgba(15,23,42,0.9)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
         <FadeIn className="self-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[#7DD3FC]">{c.contactEyebrow}</p>
@@ -1457,19 +1477,23 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('ru');
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-white font-sans text-[#0F172A]">
-      <Navbar language={language} setLanguage={setLanguage} />
-      <HeroSection language={language} />
-      <AboutSection language={language} />
-      <ServicesSection language={language} />
-      <AutomationSection language={language} />
-      <PortfolioSection language={language} />
-      <ProcessSection language={language} />
-      <TechAndBenefits language={language} />
-      <TrustSection language={language} />
-      <FaqSection language={language} />
-      <ContactSection language={language} />
-      <Footer language={language} />
+    <main className="relative min-h-screen overflow-x-clip bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_48%,#EAF7FF_100%)] font-sans text-[#0F172A]">
+      <DotGridBackground className="fixed inset-0 z-0 h-screen w-screen opacity-95" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_20%_12%,rgba(186,233,253,0.38),transparent_28%),radial-gradient(circle_at_86%_18%,rgba(125,211,252,0.18),transparent_30%),linear-gradient(90deg,rgba(255,255,255,0.46)_0%,rgba(255,255,255,0.16)_46%,rgba(255,255,255,0.34)_100%)]" />
+      <div className="relative z-10">
+        <Navbar language={language} setLanguage={setLanguage} />
+        <HeroSection language={language} />
+        <AboutSection language={language} />
+        <ServicesSection language={language} />
+        <AutomationSection language={language} />
+        <PortfolioSection language={language} />
+        <ProcessSection language={language} />
+        <TechAndBenefits language={language} />
+        <TrustSection language={language} />
+        <FaqSection language={language} />
+        <ContactSection language={language} />
+        <Footer language={language} />
+      </div>
     </main>
   );
 }
