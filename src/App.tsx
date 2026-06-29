@@ -39,7 +39,6 @@ import {
   type FormEvent,
   type HTMLAttributes,
   type PropsWithChildren,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -561,147 +560,6 @@ function MagneticButton({
   );
 }
 
-function AntigravityBackground({ className = '' }: { className?: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return undefined;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return undefined;
-
-    const pointer = { x: 0, y: 0, active: false };
-    const field = { x: 0, y: 0, vx: 0, vy: 0, strength: 0 };
-    const orbs = [
-      { x: 0.18, y: 0.1, radius: 0.48, color: [186, 233, 253], alpha: 0.46, speed: 0.12, phase: 0.2 },
-      { x: 0.86, y: 0.16, radius: 0.42, color: [125, 211, 252], alpha: 0.34, speed: 0.16, phase: 1.8 },
-      { x: 0.52, y: 0.54, radius: 0.54, color: [226, 246, 255], alpha: 0.42, speed: 0.1, phase: 3.2 },
-      { x: 0.14, y: 0.88, radius: 0.38, color: [148, 208, 236], alpha: 0.22, speed: 0.18, phase: 4.4 },
-    ];
-    let width = 0;
-    let height = 0;
-    let dpr = window.devicePixelRatio || 1;
-    let animationFrame = 0;
-    let previousTime = 0;
-    let timeScale = 0;
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.floor(width * dpr));
-      canvas.height = Math.max(1, Math.floor(height * dpr));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      if (!pointer.active) {
-        pointer.x = width * 0.68;
-        pointer.y = height * 0.22;
-        field.x = pointer.x;
-        field.y = pointer.y;
-      }
-    };
-
-    const updatePointer = (event: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = event.clientX - rect.left;
-      pointer.y = event.clientY - rect.top;
-      pointer.active = pointer.x >= 0 && pointer.x <= rect.width && pointer.y >= 0 && pointer.y <= rect.height;
-    };
-
-    const clearPointer = () => {
-      pointer.active = false;
-    };
-
-    const drawOrb = (x: number, y: number, radius: number, color: number[], alpha: number) => {
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
-      gradient.addColorStop(0.42, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.42})`);
-      gradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
-    };
-
-    const draw = (time: number) => {
-      animationFrame = requestAnimationFrame(draw);
-      const delta = Math.min((time - (previousTime || time)) / 1000, 0.05);
-      previousTime = time;
-      timeScale += delta;
-
-      if (pointer.active) {
-        const stiffness = 44;
-        field.vx += (pointer.x - field.x) * stiffness * delta;
-        field.vy += (pointer.y - field.y) * stiffness * delta;
-        field.strength += (1 - field.strength) * Math.min(1, delta * 3.4);
-      } else {
-        const idleX = width * (0.54 + Math.sin(timeScale * 0.18) * 0.18);
-        const idleY = height * (0.44 + Math.cos(timeScale * 0.14) * 0.18);
-        field.vx += (idleX - field.x) * 10 * delta;
-        field.vy += (idleY - field.y) * 10 * delta;
-        field.strength += (0.42 - field.strength) * Math.min(1, delta * 1.2);
-      }
-
-      field.vx *= Math.max(0, 1 - delta * 2.1);
-      field.vy *= Math.max(0, 1 - delta * 2.1);
-      field.x += field.vx * delta;
-      field.y += field.vy * delta;
-
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#f8fbff';
-      ctx.fillRect(0, 0, width, height);
-
-      const base = Math.max(width, height);
-      for (const orb of orbs) {
-        const driftX = Math.sin(timeScale * orb.speed + orb.phase) * width * 0.065;
-        const driftY = Math.cos(timeScale * (orb.speed * 0.8) + orb.phase) * height * 0.08;
-        const pullX = (field.x - width * orb.x) * 0.11 * field.strength;
-        const pullY = (field.y - height * orb.y) * 0.11 * field.strength;
-        drawOrb(width * orb.x + driftX + pullX, height * orb.y + driftY + pullY, base * orb.radius, orb.color, orb.alpha);
-      }
-
-      drawOrb(field.x, field.y, base * (0.2 + field.strength * 0.12), [125, 211, 252], 0.22 + field.strength * 0.16);
-
-      ctx.save();
-      ctx.globalAlpha = 0.24;
-      ctx.strokeStyle = 'rgba(15, 23, 42, 0.12)';
-      ctx.lineWidth = 1;
-      for (let index = 0; index < 4; index += 1) {
-        const radius = base * (0.16 + index * 0.09 + Math.sin(timeScale * 0.28 + index) * 0.012);
-        ctx.beginPath();
-        ctx.ellipse(field.x, field.y, radius * 1.7, radius * 0.58, -0.42 + index * 0.18 + timeScale * 0.018, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      const veil = ctx.createLinearGradient(0, 0, width, height);
-      veil.addColorStop(0, 'rgba(255,255,255,0.54)');
-      veil.addColorStop(0.48, 'rgba(255,255,255,0.14)');
-      veil.addColorStop(1, 'rgba(255,255,255,0.48)');
-      ctx.fillStyle = veil;
-      ctx.fillRect(0, 0, width, height);
-    };
-
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(canvas);
-    window.addEventListener('pointermove', updatePointer, { passive: true });
-    window.addEventListener('pointerleave', clearPointer);
-    resize();
-    animationFrame = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      resizeObserver.disconnect();
-      window.removeEventListener('pointermove', updatePointer);
-      window.removeEventListener('pointerleave', clearPointer);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} aria-hidden="true" className={`pointer-events-none block ${className}`} />;
-}
-
 function SectionHeader({ eyebrow, title, text }: { eyebrow: string; title: string; text?: string }) {
   return (
     <FadeIn className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
@@ -776,7 +634,7 @@ function HeroVisual({ language }: { language: Language }) {
   const tabs = c.heroTabs;
 
   return (
-    <div className="relative min-h-[520px] lg:-mt-16">
+    <div className="relative min-h-[430px] sm:min-h-[500px] lg:-mt-16 lg:min-h-[520px]">
       <motion.div
         aria-hidden="true"
         animate={{ y: [0, -14, 0], rotate: [0, 1.5, 0] }}
@@ -790,7 +648,7 @@ function HeroVisual({ language }: { language: Language }) {
         className="absolute bottom-8 left-2 h-24 w-24 rounded-full border border-sky-100 bg-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.5)]"
       />
 
-      <FadeIn y={44} className="absolute inset-x-0 top-6 mx-auto max-w-[620px] rounded-[34px] border border-white/80 bg-white/70 p-3 shadow-[0_40px_100px_-45px_rgba(15,23,42,0.45)] backdrop-blur-2xl sm:p-4">
+      <FadeIn y={32} className="relative mx-auto max-w-[620px] rounded-[28px] border border-white/80 bg-white/78 p-3 shadow-[0_34px_80px_-48px_rgba(15,23,42,0.42)] backdrop-blur-2xl sm:rounded-[34px] sm:p-4 lg:absolute lg:inset-x-0 lg:top-6">
         <div className="rounded-[26px] border border-slate-100 bg-[#F8FBFF] p-4">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex gap-2">
@@ -801,19 +659,19 @@ function HeroVisual({ language }: { language: Language }) {
             <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-500">{c.heroVisualStatus}</div>
           </div>
 
-          <div className="mb-5 grid grid-cols-3 gap-2 rounded-full bg-white p-1 shadow-inner">
+          <div className="mb-5 grid grid-cols-3 gap-1 rounded-2xl bg-white p-1 shadow-inner sm:gap-2 sm:rounded-full">
             {tabs.map((tab, index) => (
               <motion.div
                 key={tab}
                 animate={{ backgroundColor: index === 1 ? '#0F172A' : '#FFFFFF', color: index === 1 ? '#FFFFFF' : '#64748B' }}
-                className="rounded-full px-3 py-2 text-center text-[11px] font-bold"
+                className="rounded-xl px-2 py-2 text-center text-[10px] font-bold sm:rounded-full sm:px-3 sm:text-[11px]"
               >
                 {tab}
               </motion.div>
             ))}
           </div>
 
-          <div className="grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
             <div className="rounded-[24px] bg-white p-4 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.45)]">
               <div className="mb-4 flex items-center justify-between">
                 <div>
@@ -876,24 +734,24 @@ function HeroSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="home" className="relative overflow-hidden px-4 pb-20 pt-32 sm:px-6 lg:pt-36">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.22)_44%,rgba(255,255,255,0.48)_100%)]" />
+    <section id="home" className="relative overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_58%,#EAF7FF_100%)] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:pt-36">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(186,233,253,0.75),transparent_26%),radial-gradient(circle_at_82%_12%,rgba(125,211,252,0.28),transparent_28%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-        <FadeIn className="max-w-3xl pt-14">
-          <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-tight text-[#0F172A] sm:text-6xl lg:text-7xl">
+        <FadeIn className="max-w-3xl pt-6 sm:pt-10 lg:pt-14">
+          <h1 className="max-w-5xl text-[2.72rem] font-black leading-[0.98] tracking-tight text-[#0F172A] min-[390px]:text-5xl sm:text-6xl lg:text-7xl">
             {c.heroTitle}
           </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600">{c.heroText}</p>
+          <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:mt-7 sm:text-lg sm:leading-8">{c.heroText}</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <MagneticButton href="#contact">{c.primaryCta}</MagneticButton>
             <MagneticButton href="#portfolio" variant="secondary">
               {c.secondaryCta}
             </MagneticButton>
           </div>
-          <div className="mt-10 grid max-w-2xl grid-cols-3 gap-3">
+          <div className="mt-8 grid max-w-2xl grid-cols-1 gap-3 min-[430px]:grid-cols-3 sm:mt-10">
             {c.stats.map(([value, label]) => (
-              <div key={label} className="rounded-[24px] border border-white/80 bg-white/65 p-4 shadow-[0_22px_55px_-42px_rgba(15,23,42,0.45)] backdrop-blur">
-                <p className="text-3xl font-black tracking-tight text-[#0F172A]">{value}</p>
+              <div key={label} className="rounded-[20px] border border-white/80 bg-white/72 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.4)] backdrop-blur sm:rounded-[24px]">
+                <p className="text-2xl font-black tracking-tight text-[#0F172A] sm:text-3xl">{value}</p>
                 <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{label}</p>
               </div>
             ))}
@@ -910,7 +768,7 @@ function AboutSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="about" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section id="about" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <FadeIn>
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-sky-500">WiseHeart Tech</p>
@@ -970,7 +828,7 @@ function ServicesSection({ language }: { language: Language }) {
   };
 
   return (
-    <section id="services" className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section id="services" className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.servicesEyebrow} title={c.servicesTitle} />
         <div ref={servicesGridRef} className="grid scroll-mt-28 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1087,7 +945,7 @@ function AutomationSection({ language }: { language: Language }) {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="relative overflow-hidden bg-white/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section className="overflow-hidden bg-white px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-8 rounded-[40px] border border-sky-100 bg-[linear-gradient(135deg,#0F172A_0%,#1E293B_54%,#0B4A6D_100%)] p-5 text-white shadow-[0_40px_110px_-60px_rgba(15,23,42,0.8)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
         <FadeIn className="self-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[#7DD3FC]">{c.automationEyebrow}</p>
@@ -1160,19 +1018,19 @@ function ProjectCard({ project, index, total, language }: { project: (typeof pro
   const [title, category, description] = project[language];
 
   return (
-    <div ref={ref} className="h-[76vh] min-h-[620px]">
+    <div ref={ref} className="py-4 lg:h-[76vh] lg:min-h-[620px] lg:py-0">
       <motion.article
         style={{ scale, top: `calc(5.5rem + ${index * 22}px)`, willChange: 'transform' }}
-        className="sticky overflow-hidden rounded-[36px] border border-slate-200 bg-white p-4 shadow-[0_34px_90px_-60px_rgba(15,23,42,0.55)] sm:p-6"
+        className="overflow-hidden rounded-[30px] border border-slate-200 bg-white p-4 shadow-[0_34px_90px_-60px_rgba(15,23,42,0.55)] sm:rounded-[36px] sm:p-6 lg:sticky"
       >
         <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="min-h-[360px] rounded-[28px] border border-slate-100 bg-[radial-gradient(circle_at_20%_18%,rgba(186,233,253,0.95),transparent_34%),linear-gradient(135deg,#FFFFFF_0%,#F1F8FC_42%,#E5E7EB_100%)] p-5">
+          <div className="min-h-[300px] rounded-[24px] border border-slate-100 bg-[radial-gradient(circle_at_20%_18%,rgba(186,233,253,0.95),transparent_34%),linear-gradient(135deg,#FFFFFF_0%,#F1F8FC_42%,#E5E7EB_100%)] p-4 sm:min-h-[360px] sm:rounded-[28px] sm:p-5">
             <div className="mb-5 flex gap-2">
               <span className="h-3 w-3 rounded-full bg-slate-300" />
               <span className="h-3 w-3 rounded-full bg-sky-200" />
               <span className="h-3 w-3 rounded-full bg-sky-400" />
             </div>
-            <div className="grid h-[290px] gap-3 sm:grid-cols-[0.7fr_1.3fr]">
+            <div className="grid min-h-[250px] gap-3 sm:h-[290px] sm:grid-cols-[0.7fr_1.3fr]">
               <div className="grid gap-3">
                 <div className="rounded-3xl bg-white/80 p-4 shadow-sm backdrop-blur">
                   <LineChart className="mb-8 text-sky-500" size={28} />
@@ -1202,8 +1060,8 @@ function ProjectCard({ project, index, total, language }: { project: (typeof pro
           <div className="flex flex-col justify-between p-2 sm:p-4">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-sky-500">{category}</p>
-              <h3 className="mt-4 text-4xl font-black tracking-tight text-[#0F172A]">{title}</h3>
-              <p className="mt-5 text-lg leading-8 text-slate-500">{description}</p>
+              <h3 className="mt-4 text-3xl font-black tracking-tight text-[#0F172A] sm:text-4xl">{title}</h3>
+              <p className="mt-5 text-base leading-7 text-slate-500 sm:text-lg sm:leading-8">{description}</p>
             </div>
             <a href="#contact" className="mt-8 inline-flex w-max items-center gap-2 rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-[#0F172A] transition hover:border-sky-200 hover:bg-sky-50">
               {c.similarProject}
@@ -1220,7 +1078,7 @@ function PortfolioSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="portfolio" className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section id="portfolio" className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.portfolioEyebrow} title={c.portfolioTitle} text={c.portfolioIntro} />
         {projects.map((project, index) => (
@@ -1235,7 +1093,7 @@ function ProcessSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section id="process" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section id="process" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto max-w-7xl">
         <SectionHeader eyebrow={c.processEyebrow} title={c.processTitle} />
         <div className="grid gap-3 lg:grid-cols-7">
@@ -1258,7 +1116,7 @@ function TechAndBenefits({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
           <SectionHeader eyebrow={c.stackEyebrow} title={c.techTitle} />
@@ -1295,7 +1153,7 @@ function TrustSection({ language }: { language: Language }) {
   const c = copy[language];
 
   return (
-    <section className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6">
+    <section className="bg-white px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl rounded-[40px] border border-slate-100 bg-gradient-to-br from-white to-sky-50 p-6 shadow-[0_35px_90px_-65px_rgba(15,23,42,0.55)] sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeIn>
@@ -1334,7 +1192,7 @@ function FaqSection({ language }: { language: Language }) {
   const [open, setOpen] = useState(0);
 
   return (
-    <section className="relative bg-[#F8FBFF]/68 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section className="bg-[#F8FBFF] px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto max-w-4xl">
         <SectionHeader eyebrow={c.faqEyebrow} title={c.faqTitle} />
         <div className="grid gap-3">
@@ -1381,7 +1239,7 @@ function ContactSection({ language }: { language: Language }) {
   };
 
   return (
-    <section id="contact" className="relative bg-white/72 px-4 py-20 backdrop-blur-[1px] sm:px-6 lg:py-28">
+    <section id="contact" className="bg-white px-4 py-20 sm:px-6 lg:py-28">
       <div className="mx-auto grid max-w-7xl gap-8 rounded-[40px] border border-slate-100 bg-[#0F172A] p-5 text-white shadow-[0_40px_120px_-70px_rgba(15,23,42,0.9)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
         <FadeIn className="self-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[#7DD3FC]">{c.contactEyebrow}</p>
@@ -1467,23 +1325,19 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('ru');
 
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-[#F8FBFF] font-sans text-[#0F172A]">
-      <AntigravityBackground className="fixed inset-0 z-0 h-screen w-screen" />
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0.34)_46%,rgba(248,251,255,0.62)_100%)]" />
-      <div className="relative z-10">
-        <Navbar language={language} setLanguage={setLanguage} />
-        <HeroSection language={language} />
-        <AboutSection language={language} />
-        <ServicesSection language={language} />
-        <AutomationSection language={language} />
-        <PortfolioSection language={language} />
-        <ProcessSection language={language} />
-        <TechAndBenefits language={language} />
-        <TrustSection language={language} />
-        <FaqSection language={language} />
-        <ContactSection language={language} />
-        <Footer language={language} />
-      </div>
+    <main className="min-h-screen overflow-x-clip bg-white font-sans text-[#0F172A]">
+      <Navbar language={language} setLanguage={setLanguage} />
+      <HeroSection language={language} />
+      <AboutSection language={language} />
+      <ServicesSection language={language} />
+      <AutomationSection language={language} />
+      <PortfolioSection language={language} />
+      <ProcessSection language={language} />
+      <TechAndBenefits language={language} />
+      <TrustSection language={language} />
+      <FaqSection language={language} />
+      <ContactSection language={language} />
+      <Footer language={language} />
     </main>
   );
 }
